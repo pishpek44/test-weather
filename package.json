@@ -11,9 +11,6 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "bootstrap": "^5.0.2",
-    "bootstrap-vue": "^2.21.2",
     "sass": "^1.36.0",
     "sass-loader": "7.3.1",
     "vue": "^2.5.2",

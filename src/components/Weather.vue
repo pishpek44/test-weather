@@ -1,42 +1,10 @@
 <template>
   <div class="weather" v-bind:class="{ dark: darkMode, light: !darkMode }">
-    <div class="city-input">
-      <label>
-        <input type = "text" list="cityDatalist" v-on:keyup="getCity" v-model="city" placeholder="City name" />
-      </label>
-    </div>
-
-    <datalist id = "cityDatalist">
-      <option v-bind:key="cityValue.id" v-for="cityValue in cities" :value="cityValue.name" />
-    </datalist>
+    <CityInput v-on:keyup="getCity" v-bind:list="cities" v-bind:model="city" />
 
     <div v-if="!notFoundCity" class="weather-info">
-
-      <div class="weather-title">
-        <div>
-          <h1>
-            {{Math.round(data.main.temp)}}°{{celsius?'C':'F'}}
-          </h1>
-        </div>
-        <img :src = "`http://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`"  alt=""/>
-        <div>
-          <h2>
-            {{data.name}}
-          </h2>
-        </div>
-      </div>
-
-      <div class="weather-details">
-        <div>
-          <div>Current temp: <div class = "right">{{Math.round(data.main.temp)}} °{{celsius?'C':'F'}}</div></div>
-          <div>Feels like: <div class = "right">{{Math.round(data.main.feels_like)}} °{{celsius?'C':'F'}}</div></div>
-          <div>Max temp: <div class = "right">{{Math.round(data.main.temp_max)}} °{{celsius?'C':'F'}}</div></div>
-          <div>Min temp: <div class = "right">{{Math.round(data.main.temp_min)}} °{{celsius?'C':'F'}}</div></div>
-          <div>Humidity: <div class = "right">{{Math.round(data.main.humidity)}} %</div></div>
-          <div>Pressure: <div class = "right">{{data.main.pressure}} mm</div></div>
-          <div>Wind: <div class = "right">{{data.wind.speed}} mps</div></div>
-        </div>
-      </div>
+      <Title v-bind:data = data v-bind:celsius = celsius />
+      <Details v-bind:data = data v-bind:celsius = celsius />
     </div>
 
     <div class="bottom">
@@ -48,9 +16,13 @@
 </template>
 <script>
 import './Weather.scss'
+import Details from './Weather/Details'
+import Title from './Weather/Title'
+import CityInput from './Weather/CityInput'
 
 export default {
   name: 'Weather',
+  components: {CityInput, Details, Title},
   data () {
     return {
       city: '',
@@ -84,6 +56,7 @@ export default {
       document.body.className = this.darkMode ? 'dark' : 'light'
     },
     getCity: function (e) {
+      this.city = e.target.value
       let searchedCity = this.cities.find(v => e.target.value.toUpperCase() === v.name.toUpperCase())
       if (!searchedCity) {
         this.notFound()
@@ -95,8 +68,8 @@ export default {
       this.notFoundCity = true
     },
     getCityWeatherByCoord: function (x, y) {
-      let metric = this.celsius ? '&units=metric' : ''
-      let url = `https://api.openweathermap.org/data/2.5/weather?lat=${x}&lon=${y}&appid=${this.apiKey}${metric}`
+      let units = this.celsius ? 'metric' : 'imperial'
+      let url = `https://api.openweathermap.org/data/2.5/weather?lat=${x}&lon=${y}&appid=${this.apiKey}&units=${units}`
 
       fetch(url)
         .then(response => response.json())
@@ -112,8 +85,8 @@ export default {
         if (!searchedCity) return (this.notFoundCity = true)
         id = searchedCity.id
       }
-      let metric = this.celsius ? '&units=metric' : ''
-      let url = `https://api.openweathermap.org/data/2.5/weather?id=${id}&appid=${this.apiKey}${metric}`
+      let units = this.celsius ? 'metric' : 'imperial'
+      let url = `https://api.openweathermap.org/data/2.5/weather?id=${id}&appid=${this.apiKey}&units=${units}`
 
       fetch(url)
         .then(response => response.json())
